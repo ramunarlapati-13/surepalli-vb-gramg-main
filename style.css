@@ -4,7 +4,7 @@
     --text-secondary: #a0a0a0;
     --accent: #6c5ce7;
     --accent-glow: rgba(108, 92, 231, 0.5);
-    
+
     --card-width: 100%;
     --card-height: 120px;
 }
@@ -21,10 +21,12 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+    /* Mobile App Layout Reset */
+    display: block;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
 }
 
 /* Background Ambient Orbs */
@@ -51,21 +53,40 @@ body {
 }
 
 @keyframes float {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(30px, 30px); }
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(30px, 30px);
+    }
 }
 
 .container {
     width: 100%;
-    max-width: 1200px;
-    padding: 2rem;
+    max-width: 100%;
+    padding: 1rem 1.5rem;
     z-index: 1;
+    position: relative;
+    /* Ensure z-index works without flex parent */
 }
 
 header {
     text-align: center;
     margin-bottom: 3rem;
     animation: fadeInDown 0.8s ease-out;
+}
+
+.main-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.3));
+    animation: none !important;
+    transform: none !important;
 }
 
 header h1 {
@@ -76,6 +97,7 @@ header h1 {
 .highlight {
     background: linear-gradient(135deg, #6c5ce7, #00d2d3);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -143,23 +165,27 @@ header p {
 /* 1. Glassmorphism */
 .glass {
     background: rgba(255, 255, 255, 0.05);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
 }
+
 .glass:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
 }
+
 .shine {
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     transition: left 0.5s;
 }
+
 .glass:hover .shine {
     left: 100%;
 }
@@ -168,10 +194,12 @@ header p {
 .neon {
     border: 1px solid transparent;
 }
+
 .neon:hover {
     border-color: #ff0055;
     box-shadow: 0 0 20px #ff005580, inset 0 0 10px #ff005540;
 }
+
 .neon .icon {
     color: #ff0055;
 }
@@ -182,20 +210,25 @@ header p {
     background: #0a0a0c;
     z-index: 1;
 }
+
 .gradient-border::before {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 20px; 
+    border-radius: 20px;
     padding: 2px;
     background: linear-gradient(45deg, #6c5ce7, #00d2d3);
-    -webkit-mask: 
-       linear-gradient(#fff 0 0) content-box, 
-       linear-gradient(#fff 0 0);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     z-index: -1;
 }
+
 .gradient-border:hover .icon {
     background: linear-gradient(45deg, #6c5ce7, #00d2d3);
     color: white;
@@ -207,10 +240,12 @@ header p {
     border-bottom: 6px solid #141418;
     transform: translateY(0);
 }
+
 .push-3d:hover {
     transform: translateY(2px);
     border-bottom-width: 4px;
 }
+
 .push-3d:active {
     transform: translateY(6px);
     border-bottom-width: 0px;
@@ -222,6 +257,7 @@ header p {
     box-shadow: 10px 10px 30px #050506, -10px -10px 30px #15151e;
     border: none;
 }
+
 .neumorphic:hover {
     box-shadow: inset 10px 10px 30px #050506, inset -10px -10px 30px #15151e;
 }
@@ -230,6 +266,7 @@ header p {
 .liquid {
     background: linear-gradient(135deg, #2d3436, #000000);
 }
+
 .liquid:hover {
     background: linear-gradient(135deg, #0984e3, #000000);
 }
@@ -239,6 +276,7 @@ header p {
     .container {
         padding: 1rem;
     }
+
     header h1 {
         font-size: 2rem;
     }
@@ -250,6 +288,19 @@ header p {
         opacity: 0;
         transform: translateY(-20px);
     }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
     to {
         opacity: 1;
         transform: translateY(0);
