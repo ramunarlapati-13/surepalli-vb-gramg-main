@@ -159,8 +159,36 @@ header p {
 }
 
 .info p {
-    font-size: 0.8rem;
     color: var(--text-secondary);
+}
+
+/* Split Button Styles */
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.small-card {
+    gap: 0.6rem !important;
+    padding: 0.6rem !important;
+}
+
+.small-card .icon {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 1rem !important;
+}
+
+.small-card .info h3 {
+    font-size: 0.8rem !important;
+    line-height: 1.1;
+}
+
+@media (max-width: 360px) {
+    .button-group {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* --- Varied Styles --- */
