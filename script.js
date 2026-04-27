@@ -49,3 +49,58 @@ window.addEventListener('appinstalled', (evt) => {
   console.log('App was installed');
   if (installBtn) installBtn.style.display = 'none';
 });
+
+// Auth Logic for Musters Database
+const mustersBtn = document.getElementById('musters-btn');
+const authModal = document.getElementById('auth-modal');
+const closeAuthModal = document.getElementById('close-auth-modal');
+const pinInput = document.getElementById('pin-input');
+const verifyPinBtn = document.getElementById('verify-pin-btn');
+const googleLoginBtn = document.getElementById('google-login-btn');
+
+const MUSTERS_LINK = "https://drive.google.com/drive/folders/15o6EspLO4MdsZfGHxMTFxO1Zlgkavf7f?usp=sharing";
+const CORRECT_PIN = "1157";
+
+// Check if already authorized
+function isAuthorized() {
+    return localStorage.getItem('musters_authorized') === 'true';
+}
+
+mustersBtn.addEventListener('click', () => {
+    if (isAuthorized()) {
+        window.open(MUSTERS_LINK, '_blank');
+    } else {
+        authModal.classList.add('active');
+        pinInput.focus();
+    }
+});
+
+closeAuthModal.addEventListener('click', () => {
+    authModal.classList.remove('active');
+    pinInput.value = '';
+});
+
+verifyPinBtn.addEventListener('click', () => {
+    if (pinInput.value === CORRECT_PIN) {
+        localStorage.setItem('musters_authorized', 'true');
+        authModal.classList.remove('active');
+        window.open(MUSTERS_LINK, '_blank');
+    } else {
+        alert('Incorrect PIN. Please try again.');
+        pinInput.value = '';
+        pinInput.focus();
+    }
+});
+
+pinInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        verifyPinBtn.click();
+    }
+});
+
+googleLoginBtn.addEventListener('click', () => {
+    alert('Google Login will be available soon. Please use the PIN for now.');
+    // Note: To implement real Google Login, we would initialize Firebase Auth here
+    // and check if the user email is bandilasuresh440@gmail.com or ramunarlapati27@gmail.com
+});
+

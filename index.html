@@ -154,12 +154,38 @@
     </main>
 
     <!-- Floating Action Button: Musters Database -->
-    <a href="https://drive.google.com/drive/folders/15o6EspLO4MdsZfGHxMTFxO1Zlgkavf7f?usp=sharing" target="_blank"
-        rel="noopener noreferrer" class="fab glass">
+    <div id="musters-btn" class="fab glass" style="cursor: pointer;">
         <div class="icon">🗂️</div>
         <span class="fab-text">Musters database</span>
         <div class="shine"></div>
-    </a>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <div class="icon">🔒</div>
+                <h2>Restricted Access</h2>
+                <p>Please enter PIN or sign in to continue</p>
+            </div>
+            <div class="modal-body">
+                <div class="pin-input-container">
+                    <input type="password" id="pin-input" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric">
+                </div>
+                <button id="verify-pin-btn" class="verify-button">Verify PIN</button>
+                
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+                
+                <button id="google-login-btn" class="google-button">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    Sign in with Google
+                </button>
+            </div>
+            <button class="close-modal" id="close-auth-modal">✕</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
