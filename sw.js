@@ -1,4 +1,4 @@
-const CACHE_NAME = 'surepalli-pwa-v7';
+const CACHE_NAME = 'surepalli-pwa-v8';
 const urlsToCache = [
   './',
   './index.html',
