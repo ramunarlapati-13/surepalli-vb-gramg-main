@@ -146,6 +146,20 @@
         }
         .logout-btn:hover { background: rgba(255,80,80,0.25); }
 
+        /* Sync status pill */
+        .sync-pill {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            white-space: nowrap;
+            transition: background 0.3s, color 0.3s;
+        }
+        .status-ok      { background: rgba(0,210,150,0.12); color: #00d296; border: 1px solid rgba(0,210,150,0.25); }
+        .status-saving  { background: rgba(255,200,0,0.12);  color: #ffc800; border: 1px solid rgba(255,200,0,0.25); }
+        .status-offline { background: rgba(160,160,160,0.1); color: #888;    border: 1px solid rgba(160,160,160,0.2); }
+        .status-error   { background: rgba(255,80,80,0.12);  color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
+
         /* Tab Navigation */
         .admin-tabs {
             display: flex;
@@ -522,7 +536,10 @@
                 <img src="icon.png" alt="Logo">
                 <span>Admin Panel</span>
             </div>
-            <button class="logout-btn" id="logout-btn">Logout</button>
+            <div style="display:flex;align-items:center;gap:0.8rem;">
+                <span class="sync-pill status-offline" id="sync-status">💾 Local only</span>
+                <button class="logout-btn" id="logout-btn">Logout</button>
+            </div>
         </div>
 
         <!-- Tabs -->
@@ -612,6 +629,11 @@
     <!-- Toast -->
     <div class="toast" id="toast">✅ Saved successfully!</div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Credentials & config (both git-ignored) -->
+    <script src="firebase-config.js"></script>
     <script src="config.js"></script>
     <script src="admin.js"></script>
 </body>

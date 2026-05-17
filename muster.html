@@ -432,6 +432,11 @@
 
     <div class="toast" id="toast">📋 Copied!</div>
 
+    <!-- Firebase SDK must load BEFORE the inline script below -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
     <script>
         /* ── Data from localStorage (written by admin.js) ── */
         function getMusterEntries() {
@@ -472,6 +477,12 @@
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;");
+        }
+
+        /* Show only last 5 characters of a Work ID in the display badge */
+        function shortWorkId(id) {
+            const s = String(id);
+            return s.length > 5 ? '…' + s.slice(-5) : s;
         }
 
         function highlightMatch(text, query) {
@@ -559,7 +570,7 @@
                         <span class="group-label">
                             ${highlightMatch(bucket.group, searchQuery)}
                         </span>
-                        <span class="badge-workid" style="margin-left:0.7rem;">${escapeHtml(bucket.workId)}</span>
+                        <span class="badge-workid" style="margin-left:0.7rem;" title="${escapeHtml(bucket.workId)}">${escapeHtml(shortWorkId(bucket.workId))}</span>
                         <span class="group-count">${bucket.musters.length} muster ID${bucket.musters.length !== 1 ? 's' : ''}</span>
                     </td>
                 `;
@@ -595,8 +606,50 @@
             render();
         });
 
+        /* ── Firebase real-time sync ── */
+        function initFirebaseListener() {
+            const cfg = window.FIREBASE_CONFIG;
+            const configured = cfg && cfg.apiKey && cfg.apiKey !== 'YOUR_API_KEY';
+
+            if (!configured) {
+                // No Firebase — just render from localStorage
+                render();
+                return;
+            }
+
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(cfg);
+                const db = firebase.firestore();
+
+                // Listen to muster entries — re-render on any change
+                db.collection('gramg').doc('musters').onSnapshot(doc => {
+                    if (doc.exists && doc.data().entries) {
+                        localStorage.setItem('admin_musters', JSON.stringify(doc.data().entries));
+                    }
+                    render();
+                }, err => {
+                    console.warn('Musters listener error:', err);
+                    render();
+                });
+
+                // Listen to work IDs — rebuild dropdown on any change
+                db.collection('gramg').doc('workids').onSnapshot(doc => {
+                    if (doc.exists && doc.data().list) {
+                        localStorage.setItem('admin_workids', JSON.stringify(doc.data().list));
+                    }
+                    render();
+                }, err => {
+                    console.warn('WorkIDs listener error:', err);
+                });
+
+            } catch(e) {
+                console.warn('Firebase listener init failed:', e);
+                render(); // graceful fallback
+            }
+        }
+
         /* ── Init ── */
-        render();
+        initFirebaseListener();
     </script>
 </body>
 </html>

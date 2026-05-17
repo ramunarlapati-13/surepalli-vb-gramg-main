@@ -3,6 +3,7 @@
 .env
 .env.*
 config.js
+firebase-config.js
 
 # ── OS / Editor noise ─────────────────────────────────
 .DS_Store
