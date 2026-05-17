@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0c">
+    <title>Admin Panel – VB G-RAM-G SUREPALLI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        /* ── Admin-specific overrides ── */
+        body { background-color: #0a0a0c; }
+
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .login-card .brand-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .login-card h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .login-card .subtitle {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #6c5ce7;
+            background: rgba(108,92,231,0.08);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s, transform 0.2s;
+            margin-top: 0.5rem;
+        }
+        .login-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .login-btn:active { transform: translateY(0); }
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+
+        /* ── Admin Dashboard ── */
+        #admin-dashboard { display: none; }
+        .admin-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        .admin-topbar .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .admin-topbar .logo-area img {
+            width: 36px; height: 36px;
+        }
+        .admin-topbar .logo-area span {
+            font-weight: 700;
+            font-size: 1rem;
+            background: linear-gradient(135deg,#6c5ce7,#00d2d3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logout-btn {
+            padding: 0.5rem 1.2rem;
+            background: rgba(255,80,80,0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,80,80,0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: rgba(255,80,80,0.25); }
+
+        /* Tab Navigation */
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .tab-btn {
+            padding: 0.65rem 1.3rem;
+            border: none;
+            border-bottom: 2px solid transparent;
+            background: transparent;
+            color: rgba(255,255,255,0.45);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .tab-btn.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+        }
+        .tab-btn:hover { color: rgba(255,255,255,0.8); }
+
+        /* Tab Content */
+        .tab-content { display: none; padding: 1.5rem; animation: fadeInUp 0.35s ease-out; }
+        .tab-content.active { display: block; }
+
+        /* Section Header */
+        .section-heading {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        /* Button Link Cards */
+        .link-editor-list { display: flex; flex-direction: column; gap: 0.8rem; }
+        .link-editor-item {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .link-editor-item .item-icon { font-size: 1.6rem; flex-shrink: 0; }
+        .link-editor-item .item-fields { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 200px; }
+        .link-editor-item .item-fields label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+        .link-editor-item .item-fields input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.85rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .link-editor-item .item-fields input:focus { border-color: #6c5ce7; }
+        .save-link-btn {
+            padding: 0.6rem 1rem;
+            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            font-family: 'Outfit', sans-serif;
+            flex-shrink: 0;
+        }
+        .save-link-btn:hover { opacity: 0.85; }
+        .saved-badge {
+            color: #00d2d3;
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: none;
+        }
+        .save-all-bar {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .save-all-btn {
+            padding: 0.8rem 1.8rem;
+            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            transition: transform 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .save-all-btn:hover { transform: translateY(-2px); }
+        .reset-btn {
+            padding: 0.8rem 1.4rem;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .reset-btn:hover { background: rgba(255,255,255,0.1); }
+
+        /* Muster ID Manager */
+        .muster-add-form {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 0.8rem;
+            align-items: end;
+        }
+        @media (max-width: 640px) {
+            .muster-add-form { grid-template-columns: 1fr; }
+            .link-editor-item { flex-direction: column; }
+        }
+        .muster-add-form .mf-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .muster-add-form label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+        .muster-add-form input, .muster-add-form select {
+            padding: 0.7rem 0.9rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .muster-add-form select option { background: #1a1a20; color: #fff; }
+        .muster-add-form input:focus,
+        .muster-add-form select:focus { border-color: #6c5ce7; }
+        .add-muster-btn {
+            padding: 0.7rem 1.3rem;
+            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+            font-family: 'Outfit', sans-serif;
+            transition: opacity 0.2s;
+        }
+        .add-muster-btn:hover { opacity: 0.85; }
+
+        /* WorkID Group Manager */
+        .workid-manager {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .workid-add-row {
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .workid-add-row .mf-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; min-width: 150px; }
+        .workid-add-row label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+        .workid-add-row input {
+            padding: 0.7rem 0.9rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+        .workid-add-row input:focus { border-color: #6c5ce7; }
+        .add-workid-btn {
+            padding: 0.7rem 1.2rem;
+            background: rgba(108,92,231,0.2);
+            color: #6c5ce7;
+            border: 1px solid rgba(108,92,231,0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+            font-family: 'Outfit', sans-serif;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .add-workid-btn:hover { background: rgba(108,92,231,0.3); }
+        .workid-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .workid-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(108,92,231,0.15);
+            border: 1px solid rgba(108,92,231,0.3);
+            border-radius: 20px;
+            padding: 0.3rem 0.8rem 0.3rem 0.9rem;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.85);
+        }
+        .workid-chip button {
+            background: none;
+            border: none;
+            color: rgba(255,100,100,0.7);
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1;
+            padding: 0;
+        }
+        .workid-chip button:hover { color: #ff6b6b; }
+
+        /* Muster Table */
+        .muster-table-wrap { overflow-x: auto; }
+        .muster-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .muster-table th {
+            background: rgba(108,92,231,0.12);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 0.7rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .muster-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.85);
+        }
+        .muster-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .muster-table .delete-row {
+            background: none;
+            border: none;
+            color: rgba(255,100,100,0.6);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+        .muster-table .delete-row:hover { color: #ff6b6b; }
+        .muster-table .badge-workid {
+            background: rgba(0,210,211,0.1);
+            border: 1px solid rgba(0,210,211,0.25);
+            color: #00d2d3;
+            border-radius: 20px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.9rem;
+        }
+        .empty-state .es-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #6c5ce7;
+            color: #fff;
+            padding: 0.8rem 1.6rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 9999;
+            transition: transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+            box-shadow: 0 8px 24px rgba(108,92,231,0.4);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Info banner */
+        .info-banner {
+            background: rgba(0,210,211,0.07);
+            border: 1px solid rgba(0,210,211,0.2);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-size: 0.82rem;
+            color: rgba(0,210,211,0.9);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-orb"></div>
+    <div class="background-orb orb-2"></div>
+
+    <!-- ══════════ LOGIN SCREEN ══════════ -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <span class="brand-icon">⚙️</span>
+            <h1>Admin Panel</h1>
+            <p class="subtitle">VB G-RAM-G SUREPALLI — Secure Access</p>
+
+            <div class="form-group">
+                <label for="admin-email">Email</label>
+                <input type="email" id="admin-email" placeholder="Enter admin email" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="Enter password" autocomplete="current-password">
+            </div>
+            <button class="login-btn" id="login-btn">Login to Admin Panel</button>
+            <p class="error-msg" id="login-error">❌ Invalid email or password. Please try again.</p>
+            <p style="margin-top:1.5rem;font-size:0.78rem;color:rgba(255,255,255,0.25);">
+                <a href="index.html" style="color:rgba(255,255,255,0.3);text-decoration:none;">← Back to main page</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ══════════ ADMIN DASHBOARD ══════════ -->
+    <div id="admin-dashboard">
+        <!-- Top Bar -->
+        <div class="admin-topbar">
+            <div class="logo-area">
+                <img src="icon.png" alt="Logo">
+                <span>Admin Panel</span>
+            </div>
+            <button class="logout-btn" id="logout-btn">Logout</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="tab-links">🔗 Button Links</button>
+            <button class="tab-btn" data-tab="tab-musters">🗂️ Muster IDs</button>
+        </div>
+
+        <!-- ── TAB: Button Links ── -->
+        <div id="tab-links" class="tab-content active">
+            <p class="section-heading">🔗 Edit Button Links</p>
+            <div class="info-banner">ℹ️ Changes are saved to browser storage and applied to the main page immediately.</div>
+
+            <div class="link-editor-list" id="link-editor-list">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="save-all-bar">
+                <button class="reset-btn" id="reset-all-btn">↺ Reset to Defaults</button>
+                <button class="save-all-btn" id="save-all-btn">💾 Save All Links</button>
+            </div>
+        </div>
+
+        <!-- ── TAB: Muster IDs ── -->
+        <div id="tab-musters" class="tab-content">
+            <p class="section-heading">🗂️ Manage Muster IDs</p>
+
+            <!-- Work ID Manager -->
+            <div class="workid-manager">
+                <p style="font-size:0.85rem;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:0.8rem;">Work IDs (Dropdown Options)</p>
+                <div class="workid-add-row">
+                    <div class="mf-group">
+                        <label for="new-workid-label">Work ID Label</label>
+                        <input type="text" id="new-workid-label" placeholder="e.g. AP2025-001">
+                    </div>
+                    <button class="add-workid-btn" id="add-workid-btn">+ Add Work ID</button>
+                </div>
+                <div class="workid-chips" id="workid-chips">
+                    <!-- chips rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Add Muster Entry -->
+            <p style="font-size:0.9rem;font-weight:700;margin-bottom:0.8rem;">Add Muster Entry</p>
+            <div class="muster-add-form">
+                <div class="mf-group">
+                    <label for="m-group">Group Name</label>
+                    <input type="text" id="m-group" placeholder="e.g. Group A">
+                </div>
+                <div class="mf-group">
+                    <label for="m-workid">Work ID</label>
+                    <select id="m-workid">
+                        <option value="">-- Select Work ID --</option>
+                    </select>
+                </div>
+                <div class="mf-group">
+                    <label for="m-musterid">Muster ID</label>
+                    <input type="text" id="m-musterid" placeholder="e.g. MR-2025-0042">
+                </div>
+                <button class="add-muster-btn" id="add-muster-btn">Add Entry</button>
+            </div>
+
+            <!-- Muster Table -->
+            <div class="muster-table-wrap">
+                <table class="muster-table" id="muster-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Group Name</th>
+                            <th>Work ID</th>
+                            <th>Muster ID</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="muster-tbody">
+                        <!-- rows by JS -->
+                    </tbody>
+                </table>
+                <div class="empty-state" id="muster-empty" style="display:none;">
+                    <div class="es-icon">📭</div>
+                    No muster entries yet. Add one above.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">✅ Saved successfully!</div>
+
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
