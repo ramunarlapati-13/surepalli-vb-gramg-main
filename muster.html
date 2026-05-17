@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0c">
+    <meta name="description" content="Muster IDs – VB G-RAM-G SUREPALLI: View group names, work IDs and muster IDs.">
+    <title>Muster IDs – VB G-RAM-G SUREPALLI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        body { background-color: #0a0a0c; }
+
+        /* ── Page layout ── */
+        .muster-page {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 1.5rem 1.2rem 6rem;
+        }
+
+        /* ── Back button ── */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+            margin-bottom: 1.8rem;
+            width: fit-content;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+        }
+
+        /* ── Header ── */
+        .muster-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .muster-header .page-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 0.6rem;
+        }
+        .muster-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .muster-header h1 span {
+            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .muster-header p {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.9rem;
+        }
+
+        /* ── Filter bar ── */
+        .filter-bar {
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.5s ease-out 0.2s both;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex: 1;
+            min-width: 180px;
+        }
+        .filter-group label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .filter-group select,
+        .filter-group input {
+            padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            width: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.9rem center;
+            padding-right: 2.2rem;
+        }
+        .filter-group input {
+            background-image: none;
+            padding-right: 1rem;
+        }
+        .filter-group select option { background: #1a1a22; color: #fff; }
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: #6c5ce7;
+            background-color: rgba(108,92,231,0.07);
+        }
+        .clear-filter-btn {
+            padding: 0.75rem 1.2rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.55);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Outfit', sans-serif;
+            transition: background 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .clear-filter-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* ── Stats Row ── */
+        .stats-row {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .stat-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(108,92,231,0.1);
+            border: 1px solid rgba(108,92,231,0.2);
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.7);
+        }
+        .stat-chip strong { color: #6c5ce7; }
+
+        /* ── Table ── */
+        .muster-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease-out 0.3s both;
+        }
+        .muster-table-wrap { overflow-x: auto; }
+        .muster-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+        .muster-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .muster-table th {
+            background: rgba(108,92,231,0.15);
+            color: rgba(255,255,255,0.55);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            padding: 0.85rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            white-space: nowrap;
+        }
+        .muster-table th:first-child { border-radius: 0; }
+        .muster-table td {
+            padding: 0.9rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.88);
+            vertical-align: middle;
+        }
+        .muster-table tr:last-child td { border-bottom: none; }
+        .muster-table tr { transition: background 0.15s; }
+        .muster-table tr:hover td { background: rgba(255,255,255,0.04); }
+
+        /* serial number */
+        .muster-table td:first-child {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+            width: 40px;
+        }
+
+        /* ── Group header row (spans full width) ── */
+        .group-header-row td {
+            background: rgba(108,92,231,0.08);
+            border-top: 1px solid rgba(108,92,231,0.2);
+            border-bottom: 1px solid rgba(108,92,231,0.12);
+            padding: 0.6rem 1.2rem;
+            vertical-align: middle;
+        }
+        .group-header-row:first-child td { border-top: none; }
+        .group-header-row td { color: rgba(255,255,255,0.95); }
+        .group-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .group-label::before {
+            content: '';
+            display: inline-block;
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
+            flex-shrink: 0;
+        }
+        .group-count {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.38);
+            margin-left: 0.3rem;
+            font-weight: 400;
+        }
+        /* sub-rows (muster id rows inside a group) */
+        .muster-sub-row td:first-child {
+            width: 32px;
+            text-align: center;
+            color: rgba(255,255,255,0.2);
+            font-size: 0.75rem;
+        }
+        .muster-sub-row td {
+            padding: 0.7rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .muster-sub-row:last-child td { border-bottom: none; }
+
+        /* Group badge */
+        .badge-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-weight: 600;
+        }
+        .badge-group::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
+            flex-shrink: 0;
+        }
+
+        /* Work ID badge */
+        .badge-workid {
+            background: rgba(0,210,211,0.1);
+            border: 1px solid rgba(0,210,211,0.25);
+            color: #00d2d3;
+            border-radius: 20px;
+            padding: 0.25rem 0.7rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Muster ID */
+        .muster-id-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.88rem;
+            color: rgba(255,220,100,0.9);
+            background: rgba(255,200,0,0.06);
+            border: 1px solid rgba(255,200,0,0.15);
+            border-radius: 6px;
+            padding: 0.2rem 0.6rem;
+            display: inline-block;
+        }
+
+        /* Copy btn */
+        .copy-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.25);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0.2rem 0.3rem;
+            border-radius: 4px;
+            transition: color 0.15s, background 0.15s;
+            vertical-align: middle;
+        }
+        .copy-btn:hover {
+            color: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.07);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: rgba(255,255,255,0.3);
+        }
+        .empty-state .es-icon { font-size: 3rem; margin-bottom: 0.7rem; display: block; }
+        .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+        .empty-state a { color: #6c5ce7; text-decoration: none; }
+        .empty-state a:hover { text-decoration: underline; }
+
+        /* No-data state when filter returns nothing */
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.9rem;
+        }
+
+        /* ── Floating search highlight ── */
+        mark {
+            background: rgba(108,92,231,0.35);
+            color: #fff;
+            border-radius: 2px;
+            padding: 0 2px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #6c5ce7;
+            color: #fff;
+            padding: 0.7rem 1.4rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            z-index: 9999;
+            transition: transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+            box-shadow: 0 6px 20px rgba(108,92,231,0.4);
+            white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 500px) {
+            .muster-header h1 { font-size: 1.4rem; }
+            .muster-table th, .muster-table td { padding: 0.7rem 0.8rem; font-size: 0.82rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-orb"></div>
+    <div class="background-orb orb-2"></div>
+
+    <div class="muster-page">
+
+        <a href="index.html" class="back-btn">← Back to Main Page</a>
+
+        <!-- Header -->
+        <div class="muster-header">
+            <span class="page-icon">🗂️</span>
+            <h1>Muster <span>IDs</span></h1>
+            <p>VB G-RAM-G SUREPALLI — Group wise muster register</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label for="filter-workid">Filter by Work ID</label>
+                <select id="filter-workid">
+                    <option value="">All Work IDs</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-search">Search Group / Muster ID</label>
+                <input type="text" id="filter-search" placeholder="Type to search…">
+            </div>
+            <button class="clear-filter-btn" id="clear-filter-btn">✕ Clear</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" id="stats-row">
+            <div class="stat-chip">Groups: <strong id="stat-groups">0</strong></div>
+            <div class="stat-chip">Muster IDs: <strong id="stat-total">0</strong></div>
+            <div class="stat-chip" id="stat-filtered-wrap" style="display:none;">Shown: <strong id="stat-filtered">0</strong></div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="muster-card">
+            <div class="muster-table-wrap">
+                <table class="muster-table" id="muster-table">
+                    <thead>
+                        <tr>
+                            <th style="width:32px">#</th>
+                            <th>Work ID</th>
+                            <th>Muster ID</th>
+                            <th style="width:42px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="muster-tbody"></tbody>
+                </table>
+                <!-- empty / no-results states -->
+                <div class="empty-state" id="empty-state" style="display:none;">
+                    <span class="es-icon">📭</span>
+                    <p>No muster entries have been added yet.<br>
+                    An admin can add entries via the <a href="admin.html">Admin Panel</a>.</p>
+                </div>
+                <div class="no-results" id="no-results" style="display:none;">
+                    🔍 No entries match your filter. Try clearing the search.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">📋 Copied!</div>
+
+    <script>
+        /* ── Data from localStorage (written by admin.js) ── */
+        function getMusterEntries() {
+            const raw = localStorage.getItem("admin_musters");
+            return raw ? JSON.parse(raw) : [];
+        }
+        function getWorkIds() {
+            const raw = localStorage.getItem("admin_workids");
+            return raw ? JSON.parse(raw) : [];
+        }
+
+        /* ── Toast ── */
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2000);
+        }
+
+        /* ── Copy to clipboard ── */
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => showToast("📋 Copied: " + text));
+        }
+
+        /* ── Render ── */
+        const filterWorkid = document.getElementById("filter-workid");
+        const filterSearch = document.getElementById("filter-search");
+        const tbody        = document.getElementById("muster-tbody");
+        const emptyState   = document.getElementById("empty-state");
+        const noResults    = document.getElementById("no-results");
+        const statTotal    = document.getElementById("stat-total");
+        const statFiltered = document.getElementById("stat-filtered");
+        const statFilteredWrap = document.getElementById("stat-filtered-wrap");
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function highlightMatch(text, query) {
+            if (!query) return escapeHtml(text);
+            const idx = text.toLowerCase().indexOf(query.toLowerCase());
+            if (idx === -1) return escapeHtml(text);
+            return escapeHtml(text.slice(0, idx))
+                + `<mark>${escapeHtml(text.slice(idx, idx + query.length))}</mark>`
+                + escapeHtml(text.slice(idx + query.length));
+        }
+
+        function populateWorkIdDropdown(workIds, entries) {
+            // union of admin-saved workIds AND workIds present in entries
+            const all = new Set([...workIds, ...entries.map(e => e.workId)]);
+            filterWorkid.innerHTML = `<option value="">All Work IDs</option>`;
+            all.forEach(w => {
+                const opt = document.createElement("option");
+                opt.value = w; opt.textContent = w;
+                filterWorkid.appendChild(opt);
+            });
+        }
+
+        function render() {
+            const allEntries  = getMusterEntries();
+            const workIds     = getWorkIds();
+            const selWorkId   = filterWorkid.value;
+            const searchQuery = filterSearch.value.trim();
+
+            // Stats
+            statTotal.textContent = allEntries.length;
+            const allGroups = new Set(allEntries.map(e => e.group + '||' + e.workId));
+            document.getElementById("stat-groups").textContent = allGroups.size;
+
+            populateWorkIdDropdown(workIds, allEntries);
+            filterWorkid.value = selWorkId; // restore after re-populate
+
+            // Filter
+            let filtered = allEntries;
+            if (selWorkId) filtered = filtered.filter(e => e.workId === selWorkId);
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                filtered = filtered.filter(e =>
+                    e.group.toLowerCase().includes(q) ||
+                    e.musterId.toLowerCase().includes(q) ||
+                    e.workId.toLowerCase().includes(q)
+                );
+            }
+
+            const isFiltering = selWorkId || searchQuery;
+            statFilteredWrap.style.display = isFiltering ? "flex" : "none";
+            if (isFiltering) statFiltered.textContent = filtered.length;
+
+            tbody.innerHTML = "";
+            emptyState.style.display = "none";
+            noResults.style.display  = "none";
+
+            if (allEntries.length === 0) {
+                emptyState.style.display = "block";
+                return;
+            }
+            if (filtered.length === 0) {
+                noResults.style.display = "block";
+                return;
+            }
+
+            // ── Group by (group name + workId) ──
+            // Preserve insertion order; same group+workId = same bucket
+            const buckets = [];
+            const bucketKey = {};
+            filtered.forEach(e => {
+                const key = e.group + '||' + e.workId;
+                if (bucketKey[key] === undefined) {
+                    bucketKey[key] = buckets.length;
+                    buckets.push({ group: e.group, workId: e.workId, musters: [] });
+                }
+                buckets[bucketKey[key]].musters.push(e.musterId);
+            });
+
+            buckets.forEach((bucket, gi) => {
+                // ── Group header row ──
+                const headerRow = document.createElement("tr");
+                headerRow.className = "group-header-row";
+                headerRow.innerHTML = `
+                    <td colspan="4">
+                        <span class="group-label">
+                            ${highlightMatch(bucket.group, searchQuery)}
+                        </span>
+                        <span class="badge-workid" style="margin-left:0.7rem;">${escapeHtml(bucket.workId)}</span>
+                        <span class="group-count">${bucket.musters.length} muster ID${bucket.musters.length !== 1 ? 's' : ''}</span>
+                    </td>
+                `;
+                tbody.appendChild(headerRow);
+
+                // ── Sub-rows: one per Muster ID ──
+                bucket.musters.forEach((mid, mi) => {
+                    const tr = document.createElement("tr");
+                    tr.className = "muster-sub-row";
+                    tr.innerHTML = `
+                        <td>${mi + 1}</td>
+                        <td colspan="2">
+                            <span class="muster-id-cell">${highlightMatch(mid, searchQuery)}</span>
+                        </td>
+                        <td>
+                            <button class="copy-btn" data-val="${escapeHtml(mid)}" title="Copy Muster ID">📋</button>
+                        </td>
+                    `;
+                    tr.querySelector(".copy-btn").addEventListener("click", ev => {
+                        copyText(ev.currentTarget.dataset.val);
+                    });
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        /* ── Events ── */
+        filterWorkid.addEventListener("change", render);
+        filterSearch.addEventListener("input", render);
+        document.getElementById("clear-filter-btn").addEventListener("click", () => {
+            filterWorkid.value = "";
+            filterSearch.value = "";
+            render();
+        });
+
+        /* ── Init ── */
+        render();
+    </script>
+</body>
+</html>
