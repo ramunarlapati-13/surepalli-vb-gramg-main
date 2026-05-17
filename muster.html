@@ -204,6 +204,23 @@
       border-right: 2px solid rgba(108,92,231,0.2) !important;
       white-space: nowrap;
     }
+    .copy-all-btn {
+      background: rgba(108,92,231,0.15);
+      border: 1px solid rgba(108,92,231,0.3);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      font-family: 'Outfit', sans-serif;
+      white-space: nowrap;
+    }
+    .copy-all-btn:hover {
+      background: rgba(108,92,231,0.3);
+      color: #fff;
+    }
 
     /* Group Name — white, merged */
     .cell-group {
@@ -540,12 +557,25 @@
         tdNum.textContent = i + 2; // row 1 is header
         tr.appendChild(tdNum);
 
-        // Column A: Date Range (merged)
+        // Column A: Date Range (merged) + copy-all button
         if (drSpan[i] > 0) {
+          // Collect all muster IDs in this date range span
+          const allMids = [];
+          for (let j = i; j < i + drSpan[i]; j++) allMids.push(rows[j].mid);
+          const midsCsv = allMids.join(', ');
+
           const td = document.createElement('td');
           td.className = 'cell-daterange';
           td.rowSpan = drSpan[i];
-          td.innerHTML = highlight(row.dr, q);
+          td.innerHTML =
+            `<div style="display:flex;flex-direction:column;align-items:center;gap:0.4rem;">` +
+              `<span>${highlight(row.dr, q)}</span>` +
+              `<button class="copy-all-btn" title="Copy all ${allMids.length} muster IDs">📋 Copy All</button>` +
+            `</div>`;
+          td.querySelector('.copy-all-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText(midsCsv)
+              .then(() => showToast(`📋 Copied ${allMids.length} muster IDs`));
+          });
           tr.appendChild(td);
         }
 
