@@ -82,19 +82,30 @@
         .login-btn {
             width: 100%;
             padding: 1rem;
-            background: linear-gradient(135deg, #6c5ce7, #00d2d3);
-            color: #fff;
-            border: none;
+            background: #fff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
             border-radius: 12px;
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: opacity 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: background 0.2s, box-shadow 0.2s;
             margin-top: 0.5rem;
+            font-family: 'Outfit', sans-serif;
         }
-        .login-btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        .login-btn:active { transform: translateY(0); }
+        .login-btn:hover {
+            background: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        .login-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        .login-btn img { width: 20px; height: 20px; flex-shrink: 0; }
         .error-msg {
             color: #ff6b6b;
             font-size: 0.85rem;
@@ -510,18 +521,16 @@
         <div class="login-card">
             <span class="brand-icon">⚙️</span>
             <h1>Admin Panel</h1>
-            <p class="subtitle">VB G-RAM-G SUREPALLI — Secure Access</p>
+            <p class="subtitle">VB G-RAM-G SUREPALLI — Authorised access only</p>
+            <p style="font-size:0.82rem;color:rgba(255,255,255,0.35);margin-bottom:1.8rem;line-height:1.5;">
+                Sign in with an authorised Google account to continue.
+            </p>
 
-            <div class="form-group">
-                <label for="admin-email">Email</label>
-                <input type="email" id="admin-email" placeholder="Enter admin email" autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label for="admin-password">Password</label>
-                <input type="password" id="admin-password" placeholder="Enter password" autocomplete="current-password">
-            </div>
-            <button class="login-btn" id="login-btn">Login to Admin Panel</button>
-            <p class="error-msg" id="login-error">❌ Invalid email or password. Please try again.</p>
+            <button class="login-btn" id="login-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google
+            </button>
+            <p class="error-msg" id="login-error"></p>
             <p style="margin-top:1.5rem;font-size:0.78rem;color:rgba(255,255,255,0.25);">
                 <a href="index.html" style="color:rgba(255,255,255,0.3);text-decoration:none;">← Back to main page</a>
             </p>
@@ -577,14 +586,31 @@
                     </div>
                     <button class="add-workid-btn" id="add-workid-btn">+ Add Work ID</button>
                 </div>
-                <div class="workid-chips" id="workid-chips">
-                    <!-- chips rendered by JS -->
+                <div class="workid-chips" id="workid-chips"></div>
+            </div>
+
+            <!-- Date Range Manager -->
+            <div class="workid-manager" style="margin-bottom:1.5rem;">
+                <p style="font-size:0.85rem;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:0.8rem;">📅 Date Ranges (Dropdown Options)</p>
+                <div class="workid-add-row">
+                    <div class="mf-group">
+                        <label for="new-daterange-label">Date Range</label>
+                        <input type="text" id="new-daterange-label" placeholder="e.g. 18/05/2026 - 24/05/2026">
+                    </div>
+                    <button class="add-workid-btn" id="add-daterange-btn">+ Add Range</button>
                 </div>
+                <div class="workid-chips" id="daterange-chips"></div>
             </div>
 
             <!-- Add Muster Entry -->
             <p style="font-size:0.9rem;font-weight:700;margin-bottom:0.8rem;">Add Muster Entry</p>
-            <div class="muster-add-form">
+            <div class="muster-add-form" style="grid-template-columns:1fr 1fr 1fr 1fr auto;">
+                <div class="mf-group">
+                    <label for="m-daterange">Date Range</label>
+                    <select id="m-daterange">
+                        <option value="">-- Select Date Range --</option>
+                    </select>
+                </div>
                 <div class="mf-group">
                     <label for="m-group">Group Name</label>
                     <input type="text" id="m-group" placeholder="e.g. Group A">
@@ -608,6 +634,7 @@
                     <thead>
                         <tr>
                             <th>#</th>
+                            <th>Date Range</th>
                             <th>Group Name</th>
                             <th>Work ID</th>
                             <th>Muster ID</th>
@@ -629,12 +656,12 @@
     <!-- Toast -->
     <div class="toast" id="toast">✅ Saved successfully!</div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <!-- Credentials & config (both git-ignored) -->
+    <!-- Firebase project config (git-ignored) -->
     <script src="firebase-config.js"></script>
-    <script src="config.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

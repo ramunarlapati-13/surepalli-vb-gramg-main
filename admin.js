@@ -1,22 +1,25 @@
 /* ══════════════════════════════════════════
    admin.js  –  VB G-RAM-G SUREPALLI Admin
+   Auth: Firebase Email/Password (production)
    ══════════════════════════════════════════ */
 
-/* ── Credentials — loaded from config.js (git-ignored) ── */
-const _cfg         = window.ADMIN_CONFIG || {};
-const ADMIN_EMAIL    = _cfg.email    || "";
-const ADMIN_PASSWORD = _cfg.password || "";
+/* ── Allowed admin accounts ── */
+const ALLOWED_EMAILS = [
+  'ramunarlapati27@gmail.com',
+  'bandilasuresh440@gmail.com'
+];
 
 /* ══════════════════════════════════════
    FIREBASE SETUP
-   Data is stored in Firestore so every
-   device sees updates in real-time.
+   Firestore for data storage.
+   Firebase Auth for admin login.
    localStorage is used as a local cache.
 ══════════════════════════════════════ */
-let db = null;          // Firestore instance
-let _fbReady = false;   // true once Firebase is initialized
+let db       = null;
+let auth     = null;
+let _fbReady = false;
 
-const FB_COL = "gramg"; // Firestore collection name
+const FB_COL = "gramg";
 
 function _isFirebaseConfigured() {
   const cfg = window.FIREBASE_CONFIG;
@@ -25,22 +28,66 @@ function _isFirebaseConfigured() {
 
 function initFirebase() {
   if (!_isFirebaseConfigured()) {
-    console.warn("Firebase not configured — running in local-only mode.");
+    console.warn("Firebase not configured — no credentials found.");
     setSyncStatus("offline");
+    showLogin();
     return;
   }
+
+  /* ── Step 1: Initialise the Firebase app ── */
   try {
     if (!firebase.apps.length) {
       firebase.initializeApp(window.FIREBASE_CONFIG);
     }
+  } catch (e) {
+    console.error("Firebase app init failed:", e);
+    setSyncStatus("error");
+    showLogin();
+    return;
+  }
+
+  /* ── Step 2: Initialise Firestore ── */
+  try {
     db = firebase.firestore();
     _fbReady = true;
     setSyncStatus("connected");
-    console.log("Firebase Firestore connected ✓");
   } catch (e) {
-    console.error("Firebase init failed:", e);
+    console.error("Firestore init failed:", e);
     setSyncStatus("error");
   }
+
+  /* ── Step 3: Initialise Auth ── */
+  if (typeof firebase.auth !== "function") {
+    /* Auth SDK script didn't load — most likely a network issue */
+    console.error("Firebase Auth SDK not loaded. Check network/CDN.");
+    setSyncStatus("error");
+    showLogin();
+    return;
+  }
+
+  try {
+    auth = firebase.auth();
+  } catch (e) {
+    console.error("Firebase Auth init failed:", e);
+    setSyncStatus("error");
+    showLogin();
+    return;
+  }
+
+  /* ── Step 4: Listen for auth state changes ── */
+  auth.onAuthStateChanged(async (user) => {
+    if (user && ALLOWED_EMAILS.includes(user.email)) {
+      loginError.classList.remove("show");
+      await showDashboard();
+    } else {
+      if (user) {
+        await auth.signOut();
+        showLogin("Access denied. Your account is not authorised.");
+      } else {
+        showLogin();
+      }
+    }
+  });
 }
 
 /* ── Sync status pill in the topbar ── */
@@ -76,19 +123,22 @@ async function cloudSave(docName, payload) {
 /* ── Load all data from Firestore into localStorage ── */
 async function loadFromCloud() {
   if (!_fbReady || !db) return;
-  setSyncStatus("saving"); // reuse "in-progress" look while loading
+  setSyncStatus("saving");
   try {
-    const [mDoc, wDoc, lDoc] = await Promise.all([
+    const [mDoc, wDoc, lDoc, dDoc] = await Promise.all([
       db.collection(FB_COL).doc("musters").get(),
       db.collection(FB_COL).doc("workids").get(),
       db.collection(FB_COL).doc("links").get(),
+      db.collection(FB_COL).doc("dateranges").get(),
     ]);
     if (mDoc.exists && mDoc.data().entries)
-      localStorage.setItem("admin_musters", JSON.stringify(mDoc.data().entries));
+      localStorage.setItem("admin_musters",     JSON.stringify(mDoc.data().entries));
     if (wDoc.exists && wDoc.data().list)
-      localStorage.setItem("admin_workids", JSON.stringify(wDoc.data().list));
+      localStorage.setItem("admin_workids",     JSON.stringify(wDoc.data().list));
     if (lDoc.exists && lDoc.data().data)
-      localStorage.setItem("admin_links",   JSON.stringify(lDoc.data().data));
+      localStorage.setItem("admin_links",       JSON.stringify(lDoc.data().data));
+    if (dDoc.exists && dDoc.data().list)
+      localStorage.setItem("admin_dateranges",  JSON.stringify(dDoc.data().list));
     setSyncStatus("connected");
   } catch (e) {
     console.error("Firestore read failed:", e);
@@ -136,6 +186,15 @@ function saveWorkIds(arr) {
   cloudSave("workids", { list: arr });
 }
 
+function getDateRanges() {
+  const raw = localStorage.getItem("admin_dateranges");
+  return raw ? JSON.parse(raw) : [];
+}
+function saveDateRanges(arr) {
+  localStorage.setItem("admin_dateranges", JSON.stringify(arr));
+  cloudSave("dateranges", { list: arr });
+}
+
 function getMusterEntries() {
   const raw = localStorage.getItem("admin_musters");
   return raw ? JSON.parse(raw) : [];
@@ -154,60 +213,78 @@ function showToast(msg = "✅ Saved!") {
 }
 
 /* ══════════════════════════════════════
-   AUTH
+   UI: LOGIN / DASHBOARD
 ══════════════════════════════════════ */
-function isAdminLoggedIn() {
-  return sessionStorage.getItem("admin_auth") === "true";
-}
-function loginAdmin()  { sessionStorage.setItem("admin_auth", "true"); }
-function logoutAdmin() { sessionStorage.removeItem("admin_auth"); }
-
 const loginScreen    = document.getElementById("login-screen");
 const adminDashboard = document.getElementById("admin-dashboard");
 const loginBtn       = document.getElementById("login-btn");
 const loginError     = document.getElementById("login-error");
 const logoutBtn      = document.getElementById("logout-btn");
 
-/* showDashboard: loads cloud data first, then renders UI */
+/* ── Google Sign-In button ── */
+const GOOGLE_BTN_LABEL = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px;"> Sign in with Google`;
+
+function showLogin(errorMsg = "") {
+  loginScreen.style.display    = "flex";
+  adminDashboard.style.display = "none";
+  loginBtn.disabled    = false;
+  loginBtn.innerHTML   = GOOGLE_BTN_LABEL;
+  if (errorMsg) {
+    loginError.textContent = "❌ " + errorMsg;
+    loginError.classList.add("show");
+  } else {
+    loginError.classList.remove("show");
+  }
+}
+
 async function showDashboard() {
   loginScreen.style.display    = "none";
   adminDashboard.style.display = "block";
-  await loadFromCloud();    // pull latest from Firestore into localStorage
+  await loadFromCloud();
   renderLinkEditor();
   renderWorkIdChips();
+  renderDateRangeChips();
   renderMusterTable();
 }
-function showLogin() {
-  loginScreen.style.display    = "flex";
-  adminDashboard.style.display = "none";
-}
 
-/* ── Init ── */
-initFirebase();   // must run before any UI so status pill is set
+/* ── Initialise Firebase ── */
+initFirebase();
 
-if (isAdminLoggedIn()) {
-  showDashboard();
-} else {
-  showLogin();
-}
-
-loginBtn.addEventListener("click", () => {
-  const email = document.getElementById("admin-email").value.trim();
-  const pass  = document.getElementById("admin-password").value;
-  if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
-    loginAdmin();
-    loginError.classList.remove("show");
-    showDashboard();
-  } else {
+/* ── Login button: Google Sign-In popup ── */
+loginBtn.addEventListener("click", async () => {
+  if (!auth) {
+    loginError.textContent = "❌ Firebase Auth not ready. Reload the page.";
     loginError.classList.add("show");
-    document.getElementById("admin-password").value = "";
+    return;
+  }
+
+  loginBtn.disabled  = true;
+  loginBtn.innerHTML = "<span style='opacity:0.6'>Signing in…</span>";
+  loginError.classList.remove("show");
+
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    /* onAuthStateChanged handles dashboard/deny from here */
+  } catch (e) {
+    let msg;
+    switch (e.code) {
+      case "auth/popup-closed-by-user":    msg = "Sign-in cancelled."; break;
+      case "auth/popup-blocked":           msg = "Pop-up blocked. Allow pop-ups for this page and try again."; break;
+      case "auth/network-request-failed":  msg = "Network error. Check your connection."; break;
+      default:                             msg = "Sign-in failed (" + (e.code || e.message) + ")."; break;
+    }
+    loginError.textContent = "❌ " + msg;
+    loginError.classList.add("show");
+    loginBtn.disabled  = false;
+    loginBtn.innerHTML = GOOGLE_BTN_LABEL;
   }
 });
 
-document.getElementById("admin-email").addEventListener("keypress",    e => { if (e.key === "Enter") loginBtn.click(); });
-document.getElementById("admin-password").addEventListener("keypress", e => { if (e.key === "Enter") loginBtn.click(); });
-
-logoutBtn.addEventListener("click", () => { logoutAdmin(); showLogin(); });
+logoutBtn.addEventListener("click", async () => {
+  if (auth) await auth.signOut();
+  /* onAuthStateChanged handles showLogin() */
+});
 
 /* ══════════════════════════════════════
    TABS
@@ -247,14 +324,13 @@ function renderLinkEditor() {
     list.appendChild(item);
   });
 
-  /* Per-row save */
   list.querySelectorAll(".save-link-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const idx    = parseInt(btn.dataset.idx);
       const links2 = getLinks();
       const inputs = list.querySelectorAll(`[data-idx="${idx}"]`);
       inputs.forEach(inp => { links2[idx][inp.dataset.field] = inp.value.trim(); });
-      saveLinks(links2);   // saves to localStorage + Firestore
+      saveLinks(links2);
       const badge = document.getElementById(`saved-${idx}`);
       badge.style.display = "block";
       setTimeout(() => badge.style.display = "none", 2000);
@@ -269,7 +345,7 @@ document.getElementById("save-all-btn").addEventListener("click", () => {
     const idx = parseInt(inp.dataset.idx);
     links[idx][inp.dataset.field] = inp.value.trim();
   });
-  saveLinks(links);   // saves to localStorage + Firestore
+  saveLinks(links);
   showToast("✅ All links saved!");
 });
 
@@ -299,7 +375,7 @@ function renderWorkIdChips() {
     chip.querySelector("button").addEventListener("click", () => {
       const arr = getWorkIds();
       arr.splice(i, 1);
-      saveWorkIds(arr);   // saves to localStorage + Firestore
+      saveWorkIds(arr);
       renderWorkIdChips();
       showToast("🗑️ Work ID removed");
     });
@@ -322,13 +398,63 @@ document.getElementById("add-workid-btn").addEventListener("click", () => {
   const arr = getWorkIds();
   if (arr.includes(val)) { showToast("⚠️ Work ID already exists"); return; }
   arr.push(val);
-  saveWorkIds(arr);   // saves to localStorage + Firestore
+  saveWorkIds(arr);
   inp.value = "";
   renderWorkIdChips();
   showToast("✅ Work ID added!");
 });
 document.getElementById("new-workid-label").addEventListener("keypress", e => {
   if (e.key === "Enter") document.getElementById("add-workid-btn").click();
+});
+
+/* ══════════════════════════════════════
+   DATE RANGE CHIPS
+══════════════════════════════════════ */
+function renderDateRangeChips() {
+  const ranges = getDateRanges();
+  const chips  = document.getElementById("daterange-chips");
+  const sel    = document.getElementById("m-daterange");
+
+  chips.innerHTML = "";
+  sel.innerHTML   = `<option value="">-- Select Date Range --</option>`;
+
+  ranges.forEach((r, i) => {
+    const chip = document.createElement("div");
+    chip.className = "workid-chip";
+    chip.innerHTML = `<span>${escapeHtml(r)}</span><button data-i="${i}" title="Remove">✕</button>`;
+    chip.querySelector("button").addEventListener("click", () => {
+      const arr = getDateRanges();
+      arr.splice(i, 1);
+      saveDateRanges(arr);
+      renderDateRangeChips();
+      showToast("🗑️ Date range removed");
+    });
+    chips.appendChild(chip);
+
+    const opt = document.createElement("option");
+    opt.value = r; opt.textContent = r;
+    sel.appendChild(opt);
+  });
+
+  if (ranges.length === 0) {
+    chips.innerHTML = `<span style="color:rgba(255,255,255,0.25);font-size:0.8rem;">No date ranges added yet.</span>`;
+  }
+}
+
+document.getElementById("add-daterange-btn").addEventListener("click", () => {
+  const inp = document.getElementById("new-daterange-label");
+  const val = inp.value.trim();
+  if (!val) { inp.focus(); return; }
+  const arr = getDateRanges();
+  if (arr.includes(val)) { showToast("⚠️ Date range already exists"); return; }
+  arr.push(val);
+  saveDateRanges(arr);
+  inp.value = "";
+  renderDateRangeChips();
+  showToast("✅ Date range added!");
+});
+document.getElementById("new-daterange-label").addEventListener("keypress", e => {
+  if (e.key === "Enter") document.getElementById("add-daterange-btn").click();
 });
 
 /* ══════════════════════════════════════
@@ -348,6 +474,7 @@ function renderMusterTable() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i + 1}</td>
+      <td><span style="font-size:0.78rem;color:rgba(0,210,211,0.8);">${escapeHtml(e.dateRange || '—')}</span></td>
       <td>${escapeHtml(e.group)}</td>
       <td><span class="badge-workid">${escapeHtml(e.workId)}</span></td>
       <td>${escapeHtml(e.musterId)}</td>
@@ -357,7 +484,7 @@ function renderMusterTable() {
       if (!confirm("Delete this entry?")) return;
       const arr = getMusterEntries();
       arr.splice(i, 1);
-      saveMusterEntries(arr);   // saves to localStorage + Firestore
+      saveMusterEntries(arr);
       renderMusterTable();
       showToast("🗑️ Entry deleted");
     });
@@ -366,19 +493,21 @@ function renderMusterTable() {
 }
 
 document.getElementById("add-muster-btn").addEventListener("click", () => {
-  const group    = document.getElementById("m-group").value.trim();
-  const workId   = document.getElementById("m-workid").value;
-  const musterId = document.getElementById("m-musterid").value.trim();
-  if (!group || !workId || !musterId) {
-    showToast("⚠️ Fill all three fields");
+  const dateRange = document.getElementById("m-daterange").value;
+  const group     = document.getElementById("m-group").value.trim();
+  const workId    = document.getElementById("m-workid").value;
+  const musterId  = document.getElementById("m-musterid").value.trim();
+  if (!dateRange || !group || !workId || !musterId) {
+    showToast("⚠️ Fill all four fields");
     return;
   }
   const arr = getMusterEntries();
-  arr.push({ group, workId, musterId });
-  saveMusterEntries(arr);   // saves to localStorage + Firestore
-  document.getElementById("m-group").value    = "";
-  document.getElementById("m-musterid").value = "";
-  document.getElementById("m-workid").value   = "";
+  arr.push({ dateRange, group, workId, musterId });
+  saveMusterEntries(arr);
+  document.getElementById("m-daterange").value = "";
+  document.getElementById("m-group").value     = "";
+  document.getElementById("m-musterid").value  = "";
+  document.getElementById("m-workid").value    = "";
   renderMusterTable();
   showToast("✅ Entry added!");
 });
