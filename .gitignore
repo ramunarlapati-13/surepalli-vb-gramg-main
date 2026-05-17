@@ -1,0 +1,12 @@
+# ── Credentials / secrets ─────────────────────────────
+# Never commit these files to Git
+.env
+.env.*
+config.js
+
+# ── OS / Editor noise ─────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
