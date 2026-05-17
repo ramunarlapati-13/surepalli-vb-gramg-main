@@ -373,7 +373,20 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <!-- Firebase config: inline for production (Vercel), overridable via firebase-config.js locally -->
+  <script>
+    window.FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
+      apiKey:            "AIzaSyAPSwKBoQzQc0f4N1VtOs56dB_0haxtOkQ",
+      authDomain:        "nrega-media.firebaseapp.com",
+      databaseURL:       "https://nrega-media-default-rtdb.firebaseio.com",
+      projectId:         "nrega-media",
+      storageBucket:     "nrega-media.firebasestorage.app",
+      messagingSenderId: "550522109679",
+      appId:             "1:550522109679:web:ac8d8bb132ae6937cd651a",
+      measurementId:     "G-S3WXVLSWN2"
+    };
+  </script>
+  <script src="firebase-config.js" onerror=""></script>
 
   <script>
     /* ── localStorage helpers ── */
