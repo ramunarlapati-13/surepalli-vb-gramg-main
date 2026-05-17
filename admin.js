@@ -115,8 +115,15 @@ async function cloudSave(docName, payload) {
     setSyncStatus("saved");
     setTimeout(() => setSyncStatus("connected"), 3000);
   } catch (e) {
-    console.error("Firestore write failed:", e);
+    console.error("Firestore write failed:", e.code, e.message);
     setSyncStatus("error");
+    if (e.code === "permission-denied") {
+      showToast("🔒 Firestore permission denied — deploy rules first");
+    } else if (e.code === "not-found") {
+      showToast("⚠️ Firestore database not found — create it in Firebase Console");
+    } else {
+      showToast("⚠️ Sync error: " + (e.code || e.message));
+    }
   }
 }
 
@@ -141,8 +148,15 @@ async function loadFromCloud() {
       localStorage.setItem("admin_dateranges",  JSON.stringify(dDoc.data().list));
     setSyncStatus("connected");
   } catch (e) {
-    console.error("Firestore read failed:", e);
+    console.error("Firestore read failed:", e.code, e.message);
     setSyncStatus("error");
+    if (e.code === "permission-denied") {
+      showToast("🔒 Firestore read denied — deploy rules to allow public reads");
+    } else if (e.code === "not-found") {
+      showToast("⚠️ Firestore database not found — create it in Firebase Console");
+    } else {
+      showToast("⚠️ Cloud load error: " + (e.code || e.message));
+    }
   }
 }
 
@@ -494,22 +508,38 @@ function renderMusterTable() {
 
 document.getElementById("add-muster-btn").addEventListener("click", () => {
   const dateRange = document.getElementById("m-daterange").value;
-  const group     = document.getElementById("m-group").value.trim();
+  const groupRaw  = document.getElementById("m-group").value.trim();
   const workId    = document.getElementById("m-workid").value;
-  const musterId  = document.getElementById("m-musterid").value.trim();
-  if (!dateRange || !group || !workId || !musterId) {
+  const musterRaw = document.getElementById("m-musterid").value.trim();
+
+  if (!dateRange || !groupRaw || !workId || !musterRaw) {
     showToast("⚠️ Fill all four fields");
     return;
   }
+
+  /* ── Split comma-separated values ── */
+  const groups  = groupRaw.split(",").map(s => s.trim()).filter(Boolean);
+  const musters = musterRaw.split(",").map(s => s.trim()).filter(Boolean);
+
+  if (groups.length !== musters.length) {
+    showToast(`⚠️ Mismatch: ${groups.length} group(s) vs ${musters.length} muster ID(s)`);
+    return;
+  }
+
   const arr = getMusterEntries();
-  arr.push({ dateRange, group, workId, musterId });
+  groups.forEach((group, i) => {
+    arr.push({ dateRange, group, workId, musterId: musters[i] });
+  });
   saveMusterEntries(arr);
+
   document.getElementById("m-daterange").value = "";
   document.getElementById("m-group").value     = "";
   document.getElementById("m-musterid").value  = "";
   document.getElementById("m-workid").value    = "";
   renderMusterTable();
-  showToast("✅ Entry added!");
+
+  const count = groups.length;
+  showToast(`✅ ${count} ${count === 1 ? "entry" : "entries"} added!`);
 });
 
 /* ══════════════════════════════════════
