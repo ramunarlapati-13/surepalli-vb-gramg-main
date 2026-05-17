@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────
+//  VB G-RAM-G SUREPALLI — Firestore Security Rules
+//  Project: nrega-media
+//
+//  Data model:
+//    gramg/musters  → { entries: [...] }
+//    gramg/workids  → { list: [...] }
+//    gramg/links    → { data: [...] }
+//
+//  Access pattern:
+//    • Public pages (muster.html, index.html) → READ only
+//    • Admin panel (admin.html)               → READ + WRITE
+//      (only if signed in as an allowed admin email)
+//    • All other paths                        → denied
+// ─────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Admin email allowlist ──
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email in [
+               'ramunarlapati27@gmail.com',
+               'bandilasuresh440@gmail.com'
+             ];
+    }
+
+    // ── GRAMG app data ──
+    match /gramg/{docId} {
+      // Anyone can read (public muster / link data)
+      allow read: if true;
+
+      // Only allowlisted admins can write
+      allow write: if isAdmin()
+                   && docId in ['musters', 'workids', 'links'];
+    }
+
+    // ── Deny everything else ──
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
