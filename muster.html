@@ -485,106 +485,100 @@
       if (all.length === 0)      { emptyState.style.display = 'block'; return; }
       if (filtered.length === 0) { noResults.style.display  = 'block'; return; }
 
-      /* ── 4-level grouping: dateRange → workId → group → musters ── */
-      // Level 1: date range buckets
-      const drBuckets = [];
-      const drMap = {};
-      filtered.forEach(e => {
-        const drKey = e.dateRange || '—';
-        if (drMap[drKey] === undefined) { drMap[drKey] = drBuckets.length; drBuckets.push({ dateRange: drKey, items: [] }); }
-        drBuckets[drMap[drKey]].items.push(e);
-      });
+      /* ── Build flat row list, sorted by dateRange → workId → group ── */
+      const rows = filtered.map(e => ({
+        dr:    e.dateRange || '—',
+        wid:   e.workId    || '—',
+        grp:   e.group     || '—',
+        mid:   e.musterId  || '—',
+      }));
 
-      let rowNum = 2;
+      // Sort so identical dr/wid/grp are consecutive
+      rows.sort((a, b) =>
+        a.dr.localeCompare(b.dr) ||
+        a.wid.localeCompare(b.wid) ||
+        a.grp.localeCompare(b.grp)
+      );
 
-      drBuckets.forEach((drb, dri) => {
-        // Level 2: workId buckets within this dateRange
-        const wBuckets = [];
-        const wMap = {};
-        drb.items.forEach(e => {
-          const wKey = e.workId;
-          if (wMap[wKey] === undefined) { wMap[wKey] = wBuckets.length; wBuckets.push({ workId: wKey, items: [] }); }
-          wBuckets[wMap[wKey]].items.push(e);
+      /* ── Pre-compute rowspans ── */
+      const drSpan  = new Array(rows.length).fill(0);
+      const wSpan   = new Array(rows.length).fill(0);
+      const gSpan   = new Array(rows.length).fill(0);
+
+      for (let i = 0; i < rows.length; i++) {
+        // Date Range span
+        if (i === 0 || rows[i].dr !== rows[i - 1].dr) {
+          let span = 1;
+          while (i + span < rows.length && rows[i + span].dr === rows[i].dr) span++;
+          drSpan[i] = span;
+        }
+        // Work ID span (within same dateRange)
+        if (i === 0 || rows[i].wid !== rows[i - 1].wid || rows[i].dr !== rows[i - 1].dr) {
+          let span = 1;
+          while (i + span < rows.length && rows[i + span].wid === rows[i].wid && rows[i + span].dr === rows[i].dr) span++;
+          wSpan[i] = span;
+        }
+        // Group span (within same dateRange + workId)
+        if (i === 0 || rows[i].grp !== rows[i - 1].grp || rows[i].wid !== rows[i - 1].wid || rows[i].dr !== rows[i - 1].dr) {
+          let span = 1;
+          while (i + span < rows.length && rows[i + span].grp === rows[i].grp && rows[i + span].wid === rows[i].wid && rows[i + span].dr === rows[i].dr) span++;
+          gSpan[i] = span;
+        }
+      }
+
+      /* ── Render rows ── */
+      rows.forEach((row, i) => {
+        const tr = document.createElement('tr');
+
+        // Bucket-last separator: last row before a new dateRange
+        const isLastInDr = (i === rows.length - 1) || rows[i + 1].dr !== row.dr;
+        if (isLastInDr) tr.classList.add('bucket-last');
+
+        // Row number
+        const tdNum = document.createElement('td');
+        tdNum.className = 'cell-rownum';
+        tdNum.textContent = i + 2; // row 1 is header
+        tr.appendChild(tdNum);
+
+        // Column A: Date Range (merged)
+        if (drSpan[i] > 0) {
+          const td = document.createElement('td');
+          td.className = 'cell-daterange';
+          td.rowSpan = drSpan[i];
+          td.innerHTML = highlight(row.dr, q);
+          tr.appendChild(td);
+        }
+
+        // Column B: Work ID (merged)
+        if (wSpan[i] > 0) {
+          const td = document.createElement('td');
+          td.className = 'cell-workid';
+          td.rowSpan = wSpan[i];
+          td.innerHTML = highlight(row.wid, q);
+          tr.appendChild(td);
+        }
+
+        // Column C: Group Name (merged)
+        if (gSpan[i] > 0) {
+          const td = document.createElement('td');
+          td.className = 'cell-group';
+          td.rowSpan = gSpan[i];
+          td.innerHTML = highlight(row.grp, q);
+          tr.appendChild(td);
+        }
+
+        // Column D: Muster ID (never merged)
+        const tdM = document.createElement('td');
+        tdM.className = 'cell-muster';
+        tdM.innerHTML = `<span>${highlight(row.mid, q)}</span>` +
+          `<button class="copy-btn" data-val="${esc(row.mid)}" title="Copy">📋</button>`;
+        tdM.querySelector('.copy-btn').addEventListener('click', ev => {
+          navigator.clipboard.writeText(ev.currentTarget.dataset.val)
+            .then(() => showToast('📋 Copied: ' + ev.currentTarget.dataset.val));
         });
+        tr.appendChild(tdM);
 
-        // Level 3: group buckets within each workId
-        wBuckets.forEach((wb, wi) => {
-          const gBuckets = [];
-          const gMap = {};
-          wb.items.forEach(e => {
-            if (gMap[e.group] === undefined) { gMap[e.group] = gBuckets.length; gBuckets.push({ group: e.group, musters: [] }); }
-            gBuckets[gMap[e.group]].musters.push(e.musterId);
-          });
-
-          const wRowspan = wb.items.length;
-          const drRowspan = drb.items.length;
-          let firstRowInWork = true;
-          let firstRowInDr   = (dri === 0 && wi === 0) ? true : (wi === 0);
-          // track if we've already rendered the dateRange cell
-          const drAlreadyRendered = wi > 0;
-
-          gBuckets.forEach((gb, gi) => {
-            const gRowspan = gb.musters.length;
-            let firstRowInGroup = true;
-
-            gb.musters.forEach((mid, mi) => {
-              const isLastInBucket = (gi === gBuckets.length - 1) && (mi === gRowspan - 1) && (wi === wBuckets.length - 1);
-              const tr = document.createElement('tr');
-              if (isLastInBucket) tr.classList.add('bucket-last');
-
-              /* Row number */
-              const tdNum = document.createElement('td');
-              tdNum.className = 'cell-rownum';
-              tdNum.textContent = rowNum;
-              tr.appendChild(tdNum);
-
-              /* Column A: Date Range — merged for entire dateRange group */
-              if (!drAlreadyRendered && firstRowInGroup && mi === 0 && wi === 0) {
-                const tdDr = document.createElement('td');
-                tdDr.className = 'cell-daterange';
-                tdDr.rowSpan   = drRowspan;
-                tdDr.innerHTML = highlight(drb.dateRange, q);
-                tr.appendChild(tdDr);
-              }
-
-              /* Column B: Work ID — merged for workId group */
-              if (firstRowInGroup && mi === 0 && !drAlreadyRendered ? wi === 0 : firstRowInGroup && mi === 0) {
-                if (firstRowInWork && mi === 0) {
-                  const tdW = document.createElement('td');
-                  tdW.className = 'cell-workid';
-                  tdW.rowSpan   = wRowspan;
-                  tdW.innerHTML = highlight(wb.workId, q);
-                  tr.appendChild(tdW);
-                  firstRowInWork = false;
-                }
-              }
-
-              /* Column C: Group Name — merged for group */
-              if (firstRowInGroup && mi === 0) {
-                const tdG = document.createElement('td');
-                tdG.className = 'cell-group';
-                tdG.rowSpan   = gRowspan;
-                tdG.innerHTML = highlight(gb.group, q);
-                tr.appendChild(tdG);
-                firstRowInGroup = false;
-              }
-
-              /* Column D: Muster ID */
-              const tdM = document.createElement('td');
-              tdM.className = 'cell-muster';
-              tdM.innerHTML = `<span>${highlight(mid, q)}</span>` +
-                `<button class="copy-btn" data-val="${esc(mid)}" title="Copy">📋</button>`;
-              tdM.querySelector('.copy-btn').addEventListener('click', ev => {
-                navigator.clipboard.writeText(ev.currentTarget.dataset.val)
-                  .then(() => showToast('📋 Copied: ' + ev.currentTarget.dataset.val));
-              });
-              tr.appendChild(tdM);
-
-              tbody.appendChild(tr);
-              rowNum++;
-            });
-          });
-        });
+        tbody.appendChild(tr);
       });
     }
 
