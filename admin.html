@@ -312,8 +312,36 @@
             align-items: end;
         }
         @media (max-width: 640px) {
-            .muster-add-form { grid-template-columns: 1fr; }
+            .muster-add-form { grid-template-columns: 1fr !important; }
             .link-editor-item { flex-direction: column; }
+
+            .login-card { padding: 2rem 1.5rem; max-width: 95%; }
+            .login-card h1 { font-size: 1.4rem; }
+
+            .topbar { flex-direction: column; gap: 0.5rem; padding: 0.8rem; }
+            .topbar h2 { font-size: 0.9rem; }
+            .sync-pill { font-size: 0.7rem; }
+
+            .tab-bar { flex-wrap: wrap; gap: 0; }
+            .tab-btn { font-size: 0.72rem; padding: 0.6rem 0.7rem; flex: 1; min-width: 0; text-align: center; }
+
+            .workid-add-row { flex-direction: column; gap: 0.5rem; }
+            .workid-add-row .mf-group { flex: 1; }
+            .add-workid-btn { width: 100%; }
+
+            .workid-chips { gap: 0.4rem; }
+            .workid-chip { font-size: 0.75rem; }
+
+            .muster-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            table { font-size: 0.78rem; }
+            th, td { padding: 0.5rem 0.4rem; }
+
+            .save-all-row { flex-direction: column; gap: 0.5rem; }
+            .save-all-row button { width: 100%; }
+        }
+        @media (max-width: 380px) {
+            .tab-btn { font-size: 0.65rem; padding: 0.5rem; }
+            .login-card { padding: 1.5rem 1rem; }
         }
         .muster-add-form .mf-group { display: flex; flex-direction: column; gap: 0.4rem; }
         .muster-add-form label {
