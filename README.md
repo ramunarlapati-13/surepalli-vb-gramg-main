@@ -14,6 +14,7 @@ A progressive web application (PWA) for managing and publicly displaying MGNREGA
 - **Quick-access cards** to official NREGA portals (PO Login, NMMS, Jobcards, Work Details, etc.)
 - **Dynamic button links** — admin-editable labels and URLs synced from Firestore in real-time
 - **Muster IDs FAB** — floating action button with PIN-protected access to the muster database
+- **SEO Optimised** — includes `sitemap.xml`, Google Search Console verification, and semantic meta tags
 - **PWA installable** — works offline, installable on Android/iOS home screens
 - **Ambient UI** — dark mode with glassmorphism, gradient borders, neon glow, and floating orbs
 
@@ -82,6 +83,8 @@ A progressive web application (PWA) for managing and publicly displaying MGNREGA
 ├── sw.js                 # Service Worker — offline support, cache management
 ├── manifest.json         # PWA manifest — icons, theme, display
 ├── icon.png              # App icon
+├── sitemap.xml           # SEO sitemap for search engine indexing
+├── google30d270e82670290b.html # Google Search Console verification
 ├── firebase-config.js    # Firebase credentials (git-ignored)
 ├── firebase.json         # Firebase CLI config for rule deployment
 ├── firestore.rules       # Firestore security rules
