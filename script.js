@@ -47,13 +47,21 @@ function applyAdminLinks() {
   const urlMap = {};
   links.forEach(l => { urlMap[l.id] = l.url; });
 
-  // Patch each card: match via partial href or data attribute
-  navCards.forEach(card => {
-    const href = card.getAttribute("href") || "";
-    // Find which default link this card corresponds to by partial URL match
-    const match = DEFAULT_LINKS.find(dl => href.includes(dl.url.slice(8, 40)));
-    if (match && urlMap[match.id]) {
-      card.setAttribute("href", urlMap[match.id]);
+  // Patch each card: match via dataset, partial href, or index
+  navCards.forEach((card, idx) => {
+    let linkId = card.dataset.linkId;
+    if (!linkId) {
+      const href = card.getAttribute("href") || "";
+      const match = DEFAULT_LINKS.find(dl => href.includes(dl.url.slice(8, 40)));
+      if (match) {
+        linkId = match.id;
+      } else if (idx < 11 && DEFAULT_LINKS[idx]) {
+        linkId = DEFAULT_LINKS[idx].id;
+      }
+      if (linkId) card.dataset.linkId = linkId;
+    }
+    if (linkId && urlMap[linkId]) {
+      card.setAttribute("href", urlMap[linkId]);
     }
   });
 
@@ -63,9 +71,33 @@ function applyAdminLinks() {
   }
 }
 
+/* ── Firebase real-time listener for live link updates from Admin ── */
+function initFirebaseLinksListener() {
+  const cfg = window.FIREBASE_CONFIG;
+  if (!cfg || !cfg.apiKey || cfg.apiKey === "YOUR_API_KEY") return;
+  try {
+    if (typeof firebase === "undefined") return;
+    if (!firebase.apps.length) {
+      firebase.initializeApp(cfg);
+    }
+    const db = firebase.firestore();
+    db.collection("gramg").doc("links").onSnapshot(doc => {
+      if (doc.exists && doc.data().data) {
+        localStorage.setItem("admin_links", JSON.stringify(doc.data().data));
+        applyAdminLinks();
+      }
+    }, err => {
+      console.warn("Firestore links sync error:", err.message);
+    });
+  } catch (e) {
+    console.warn("Firebase listener init failed:", e.message);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log("VB G-RAM-G Initialized");
   applyAdminLinks();
+  initFirebaseLinksListener();
 });
 
 /* ── Service Worker (PWA) ── */
