@@ -175,7 +175,7 @@ const DEFAULT_LINKS = [
   { id:"bhuvan-mgnrega",   icon:"🌍", label:"Bhuvan Mgnrega",       sublabel:"Geo-Reports",        url:"https://bhuvan-app2.nrsc.gov.in/mgnrega/mgnrega_phase2.php#" },
   { id:"emms-reports",     icon:"📑", label:"EMMS Reports",         sublabel:"AP Gov",             url:"https://emms.ap.gov.in/nregs_ap/Reports/#" },
   { id:"nregs-apps",       icon:"📱", label:"NREGS Apps",           sublabel:"Download",           url:"https://emms.ap.gov.in/apps/NregsApps.htm##" },
-  { id:"musters-database", icon:"🗂️", label:"Musters Database",     sublabel:"FAB Button Link",    url:"https://drive.google.com/drive/folders/15o6EspLO4MdsZfGHxMTFxO1Zlgkavf7f?usp=sharing" },
+  { id:"mis-reports",      icon:"📋", label:"MIS Reports",          sublabel:"View Reports",       url:"https://vbgramgrep.dord.gov.in/VBGRAMG/MISreport.aspx" },
 ];
 
 /* ══════════════════════════════════════
@@ -184,7 +184,24 @@ const DEFAULT_LINKS = [
 ══════════════════════════════════════ */
 function getLinks() {
   const raw = localStorage.getItem("admin_links");
-  return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_LINKS));
+  if (!raw) return JSON.parse(JSON.stringify(DEFAULT_LINKS));
+  try {
+    const parsed = JSON.parse(raw);
+    const merged = JSON.parse(JSON.stringify(DEFAULT_LINKS));
+    merged.forEach(m => {
+      const existing = parsed.find(p => p.id === m.id);
+      if (existing) {
+        if (existing.url !== undefined) m.url = existing.url;
+        if (existing.label !== undefined) m.label = existing.label;
+        if (existing.sublabel !== undefined) m.sublabel = existing.sublabel;
+        if (existing.icon !== undefined) m.icon = existing.icon;
+      }
+    });
+    return merged;
+  } catch (e) {
+    console.error("Failed to parse cached links:", e);
+    return JSON.parse(JSON.stringify(DEFAULT_LINKS));
+  }
 }
 function saveLinks(arr) {
   localStorage.setItem("admin_links", JSON.stringify(arr));

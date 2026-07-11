@@ -15,7 +15,7 @@ const LINK_ID_MAP = {
   "bhuvan-mgnrega":   8,
   "emms-reports":     9,
   "nregs-apps":       10,
-  "musters-database": 11,
+  "mis-reports":      11,
 };
 
 /* ── Default links (mirrors admin.js DEFAULT_LINKS) ── */
@@ -31,7 +31,7 @@ const DEFAULT_LINKS = [
   { id:"bhuvan-mgnrega",   url:"https://bhuvan-app2.nrsc.gov.in/mgnrega/mgnrega_phase2.php#" },
   { id:"emms-reports",     url:"https://emms.ap.gov.in/nregs_ap/Reports/#" },
   { id:"nregs-apps",       url:"https://emms.ap.gov.in/apps/NregsApps.htm##" },
-  { id:"musters-database", url:"https://drive.google.com/drive/folders/15o6EspLO4MdsZfGHxMTFxO1Zlgkavf7f?usp=sharing" },
+  { id:"mis-reports",      url:"https://vbgramgrep.dord.gov.in/VBGRAMG/MISreport.aspx" },
 ];
 
 /* ── Apply admin-saved links to every <a> card on the page ── */
@@ -43,9 +43,12 @@ function applyAdminLinks() {
   // We match cards using querySelectorAll on the nav and patch by index order
   const navCards = document.querySelectorAll('nav.grid-layout a.card, nav.grid-layout .button-group a.card');
 
-  // Build a quick id→url map
+  // Build a quick id→url map (populate defaults first, then overwrite with loaded config)
   const urlMap = {};
-  links.forEach(l => { urlMap[l.id] = l.url; });
+  DEFAULT_LINKS.forEach(l => { urlMap[l.id] = l.url; });
+  if (Array.isArray(links)) {
+    links.forEach(l => { urlMap[l.id] = l.url; });
+  }
 
   // Patch each card: match via dataset, partial href, or index
   navCards.forEach((card, idx) => {
@@ -55,7 +58,7 @@ function applyAdminLinks() {
       const match = DEFAULT_LINKS.find(dl => href.includes(dl.url.slice(8, 40)));
       if (match) {
         linkId = match.id;
-      } else if (idx < 11 && DEFAULT_LINKS[idx]) {
+      } else if (idx < 12 && DEFAULT_LINKS[idx]) {
         linkId = DEFAULT_LINKS[idx].id;
       }
       if (linkId) card.dataset.linkId = linkId;
@@ -65,10 +68,7 @@ function applyAdminLinks() {
     }
   });
 
-  // Patch FAB musters link (used in click handler below)
-  if (urlMap["musters-database"]) {
-    window._MUSTERS_LINK = urlMap["musters-database"];
-  }
+
 }
 
 /* ── Firebase real-time listener for live link updates from Admin ── */
@@ -132,73 +132,3 @@ window.addEventListener('appinstalled', () => {
   console.log('App installed');
   if (installBtn) installBtn.style.display = 'none';
 });
-
-/* ── Auth Modal (Musters FAB button) ── */
-const mustersBtn    = document.getElementById('musters-btn');
-const authModal     = document.getElementById('auth-modal');
-const closeAuthModal = document.getElementById('close-auth-modal');
-const pinInput      = document.getElementById('pin-input');
-const verifyPinBtn  = document.getElementById('verify-pin-btn');
-const googleLoginBtn = document.getElementById('google-login-btn');
-
-const CORRECT_PIN = "1157";
-
-function getMustersFabLink() {
-  // Use admin-saved URL if available, else fallback default
-  if (window._MUSTERS_LINK) return window._MUSTERS_LINK;
-  const raw   = localStorage.getItem("admin_links");
-  const links = raw ? JSON.parse(raw) : null;
-  if (links) {
-    const entry = links.find(l => l.id === "musters-database");
-    if (entry) return entry.url;
-  }
-  return "https://drive.google.com/drive/folders/15o6EspLO4MdsZfGHxMTFxO1Zlgkavf7f?usp=sharing";
-}
-
-function isAuthorized() {
-  return localStorage.getItem('musters_authorized') === 'true';
-}
-
-if (mustersBtn) {
-  mustersBtn.addEventListener('click', () => {
-    if (isAuthorized()) {
-      window.open(getMustersFabLink(), '_blank');
-    } else {
-      authModal.classList.add('active');
-      pinInput.focus();
-    }
-  });
-}
-
-if (closeAuthModal) {
-  closeAuthModal.addEventListener('click', () => {
-    authModal.classList.remove('active');
-    pinInput.value = '';
-  });
-}
-
-if (verifyPinBtn) {
-  verifyPinBtn.addEventListener('click', () => {
-    if (pinInput.value === CORRECT_PIN) {
-      localStorage.setItem('musters_authorized', 'true');
-      authModal.classList.remove('active');
-      window.open(getMustersFabLink(), '_blank');
-    } else {
-      alert('Incorrect PIN. Please try again.');
-      pinInput.value = '';
-      pinInput.focus();
-    }
-  });
-}
-
-if (pinInput) {
-  pinInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') verifyPinBtn.click();
-  });
-}
-
-if (googleLoginBtn) {
-  googleLoginBtn.addEventListener('click', () => {
-    alert('Google Login will be available soon. Please use the PIN for now.');
-  });
-}

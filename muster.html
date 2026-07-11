@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0a0c">
-  <meta name="description" content="Muster IDs – VB G-RAM-G SUREPALLI: View group names, work IDs and muster IDs.">
-  <title>Muster IDs – VB G-RAM-G SUREPALLI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="vbgramg surepalli, surepalli vbgramg, muster ids surepalli, vb gramg surepalli, surepalli vb gramg">
+  <meta name="description" content="Muster IDs – VB G-RAM-G SUREPALLI (VBGRAMG Surepalli): View NREGA group names, work IDs, and muster IDs for Surepalli village.">
+  <title>Muster IDs – VB G-RAM-G SUREPALLI | VBGRAMG Surepalli</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,6 +139,7 @@
       font-weight: 700;
       color: rgba(255,255,255,0.35);
       letter-spacing: 1px;
+      -webkit-user-select: none;
       user-select: none;
     }
     .col-header-row th:last-child { border-right: none; }
@@ -156,6 +157,7 @@
       font-family: 'JetBrains Mono', monospace;
       min-width: 42px;
       width: 42px;
+      -webkit-user-select: none;
       user-select: none;
     }
 
@@ -380,7 +382,7 @@
     <div class="stats-row" id="stats-row">
       <div class="stat-chip">Groups: <strong id="stat-groups">0</strong></div>
       <div class="stat-chip">Muster IDs: <strong id="stat-total">0</strong></div>
-      <div class="stat-chip" id="stat-filtered-wrap" style="display:none;">Shown: <strong id="stat-filtered">0</strong></div>
+      <div class="stat-chip hidden" id="stat-filtered-wrap">Shown: <strong id="stat-filtered">0</strong></div>
     </div>
 
     <!-- Spreadsheet -->
@@ -408,12 +410,12 @@
           <tbody id="sheet-tbody"></tbody>
         </table>
 
-        <div class="empty-state" id="empty-state" style="display:none;">
+        <div class="empty-state hidden" id="empty-state">
           <span class="es-icon">📭</span>
           <p>No muster entries yet.<br>
           An admin can add entries via the <a href="admin.html">Admin Panel</a>.</p>
         </div>
-        <div class="no-results" id="no-results" style="display:none;">
+        <div class="no-results hidden" id="no-results">
           🔍 No entries match your filter.
         </div>
       </div>

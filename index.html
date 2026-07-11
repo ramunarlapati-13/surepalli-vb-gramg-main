@@ -3,15 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a0c">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="keywords"
-        content="surepalli, surepalli gramg, surepalli village, surepalli musunuru, surepalli suresh, bandila suresh, fa suresh">
+        content="vbgramg surepalli, surepalli vbgramg, vb gramg surepalli, surepalli vb gramg, surepalli, surepalli gramg, surepalli village, surepalli musunuru, surepalli suresh, bandila suresh, fa suresh">
     <meta name="description"
-        content="VB G-RAM-G SUREPALLI - Official portal for Jobcards, NMMS Attendance, Work Details, and Employment Reports in Surepalli village.">
-    <title>VB G-RAM-G SUREPALLI</title>
+        content="VB G-RAM-G SUREPALLI (VBGRAMG Surepalli) - Official portal for Jobcards, NMMS Attendance, Work Details, and Employment Reports in Surepalli village.">
+    <title>VB G-RAM-G SUREPALLI | VBGRAMG Surepalli</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +28,7 @@
         <header>
             <img src="icon.png" alt="VB G-RAM-G Logo" class="main-logo">
             <h1>VB <span class="highlight">G-RAM-G</span> SUREPALLI</h1>
-            <button id="install-btn" class="glass install-button" style="display: none;">
+            <button id="install-btn" class="glass install-button">
                 <span class="icon">📥</span> Install App
             </button>
         </header>
@@ -151,51 +150,22 @@
                 <div class="shine"></div>
             </a>
 
+            <!-- MIS Reports -->
+            <a href="https://vbgramgrep.dord.gov.in/VBGRAMG/MISreport.aspx" target="_blank" rel="noopener noreferrer"
+                class="card glass" data-link-id="mis-reports">
+                <div class="icon">📋</div>
+                <div class="info">
+                    <h3>MIS Reports</h3>
+                    <p>View Reports</p>
+                </div>
+                <div class="shine"></div>
+            </a>
+
         </nav>
     </main>
-
-    <!-- Floating Action Button: Musters Database -->
-    <div id="musters-btn" class="fab glass" style="cursor: pointer;">
-        <div class="icon">🗂️</div>
-        <span class="fab-text">Musters database</span>
-        <div class="shine"></div>
-    </div>
-
-    <!-- Auth Modal -->
-    <div id="auth-modal" class="modal-overlay">
-        <div class="modal-content glass">
-            <div class="modal-header">
-                <div class="icon">🔒</div>
-                <h2>Restricted Access</h2>
-                <p>Please enter PIN or sign in to continue</p>
-            </div>
-            <div class="modal-body">
-                <div class="pin-input-container">
-                    <input type="password" id="pin-input" placeholder="Enter 4-digit PIN" maxlength="4"
-                        inputmode="numeric">
-                </div>
-                <button id="verify-pin-btn" class="verify-button">Verify PIN</button>
-
-                <div class="divider">
-                    <span>OR</span>
-                </div>
-
-                <button id="google-login-btn" class="google-button">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                    Sign in with Google
-                </button>
-            </div>
-            <button class="close-modal" id="close-auth-modal">✕</button>
-        </div>
-    </div>
-
-    <footer
-        style="text-align: center; padding: 20px; margin-top: 20px; color: rgba(255, 255, 255, 0.7); font-family: 'Outfit', sans-serif;">
-        <p>&copy; 2026 rexplore technologies. Visit us at <a href="http://www.rexplore.tech" target="_blank"
-                style="color: #fff; text-decoration: underline;">www.rexplore.tech</a></p>
-        <p style="margin-top:8px;"><a href="admin.html"
-                style="color:rgba(255,255,255,0.25);font-size:0.75rem;text-decoration:none;letter-spacing:0.5px;">⚙️
-                Admin</a></p>
+    <footer class="main-footer">
+        <p>&copy; 2026 rexplore technologies. Visit us at <a href="http://www.rexplore.tech" target="_blank" rel="noopener noreferrer" class="footer-link">www.rexplore.tech</a></p>
+        <p class="admin-link-wrapper"><a href="admin.html" class="admin-link">⚙️ Admin</a></p>
     </footer>
 
     <!-- Firebase SDKs -->

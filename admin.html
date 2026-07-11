@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a0c">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel – VB G-RAM-G SUREPALLI</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,8 +26,8 @@
             width: 100%;
             max-width: 420px;
             background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 24px;
             padding: 2.5rem 2rem;
@@ -126,6 +125,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
         }
         .admin-topbar .logo-area {
@@ -307,7 +307,7 @@
             padding: 1.2rem;
             margin-bottom: 1.5rem;
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
             gap: 0.8rem;
             align-items: end;
         }
@@ -332,7 +332,7 @@
             .workid-chips { gap: 0.4rem; }
             .workid-chip { font-size: 0.75rem; }
 
-            .muster-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .muster-table-wrap { overflow-x: auto; }
             table { font-size: 0.78rem; }
             th, td { padding: 0.5rem 0.4rem; }
 
@@ -537,6 +537,55 @@
             align-items: center;
             gap: 0.5rem;
         }
+
+        /* Utility classes to remove inline styles */
+        .login-help-text {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 1.8rem;
+            line-height: 1.5;
+        }
+        .login-footer-text {
+            margin-top: 1.5rem;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.25);
+        }
+        .login-back-link {
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0.8rem;
+        }
+        .add-muster-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+        .table-row-actions {
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-outline-custom {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
@@ -550,7 +599,7 @@
             <span class="brand-icon">⚙️</span>
             <h1>Admin Panel</h1>
             <p class="subtitle">VB G-RAM-G SUREPALLI — Authorised access only</p>
-            <p style="font-size:0.82rem;color:rgba(255,255,255,0.35);margin-bottom:1.8rem;line-height:1.5;">
+            <p class="login-help-text">
                 Sign in with an authorised Google account to continue.
             </p>
 
@@ -559,8 +608,8 @@
                 Sign in with Google
             </button>
             <p class="error-msg" id="login-error"></p>
-            <p style="margin-top:1.5rem;font-size:0.78rem;color:rgba(255,255,255,0.25);">
-                <a href="index.html" style="color:rgba(255,255,255,0.3);text-decoration:none;">← Back to main page</a>
+            <p class="login-footer-text">
+                <a href="index.html" class="login-back-link">← Back to main page</a>
             </p>
         </div>
     </div>
@@ -573,7 +622,7 @@
                 <img src="icon.png" alt="Logo">
                 <span>Admin Panel</span>
             </div>
-            <div style="display:flex;align-items:center;gap:0.8rem;">
+            <div class="topbar-actions">
                 <span class="sync-pill status-offline" id="sync-status">💾 Local only</span>
                 <button class="logout-btn" id="logout-btn">Logout</button>
             </div>
@@ -606,7 +655,7 @@
 
             <!-- Work ID Manager -->
             <div class="workid-manager">
-                <p style="font-size:0.85rem;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:0.8rem;">Work IDs (Dropdown Options)</p>
+                <p class="section-label">Work IDs (Dropdown Options)</p>
                 <div class="workid-add-row">
                     <div class="mf-group">
                         <label for="new-workid-label">Work ID Label</label>
@@ -618,8 +667,8 @@
             </div>
 
             <!-- Date Range Manager -->
-            <div class="workid-manager" style="margin-bottom:1.5rem;">
-                <p style="font-size:0.85rem;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:0.8rem;">📅 Date Ranges (Dropdown Options)</p>
+            <div class="workid-manager">
+                <p class="section-label">📅 Date Ranges (Dropdown Options)</p>
                 <div class="workid-add-row">
                     <div class="mf-group">
                         <label for="new-daterange-label">Date Range</label>
@@ -631,8 +680,8 @@
             </div>
 
             <!-- Add Muster Entry -->
-            <p style="font-size:0.9rem;font-weight:700;margin-bottom:0.8rem;">Add Muster Entry</p>
-            <div class="muster-add-form" style="grid-template-columns:1fr 1fr 1fr 1fr auto;">
+            <p class="add-muster-title">Add Muster Entry</p>
+            <div class="muster-add-form">
                 <div class="mf-group">
                     <label for="m-daterange">Date Range</label>
                     <select id="m-daterange">
@@ -673,7 +722,7 @@
                         <!-- rows by JS -->
                     </tbody>
                 </table>
-                <div class="empty-state" id="muster-empty" style="display:none;">
+                <div class="empty-state hidden" id="muster-empty">
                     <div class="es-icon">📭</div>
                     No muster entries yet. Add one above.
                 </div>
