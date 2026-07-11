@@ -7,8 +7,10 @@
     <meta name="theme-color" content="#0a0a0c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="keywords" content="surepalli, surepalli gramg, surepalli village, surepalli musunuru, surepalli suresh, bandila suresh, fa suresh">
-    <meta name="description" content="VB G-RAM-G SUREPALLI - Official portal for Jobcards, NMMS Attendance, Work Details, and Employment Reports in Surepalli village.">
+    <meta name="keywords"
+        content="surepalli, surepalli gramg, surepalli village, surepalli musunuru, surepalli suresh, bandila suresh, fa suresh">
+    <meta name="description"
+        content="VB G-RAM-G SUREPALLI - Official portal for Jobcards, NMMS Attendance, Work Details, and Employment Reports in Surepalli village.">
     <title>VB G-RAM-G SUREPALLI</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +36,7 @@
 
         <nav class="grid-layout">
             <!-- PO Login -->
-            <a href="https://nregade1.dord.gov.in/netnrega/Login.aspx?&level=HomePO&state_code=02" target="_blank"
+            <a href="https://vbgramgde1.dord.gov.in/VBGRAMG/Login.aspx?level=HomePO&state_code=02" target="_blank"
                 rel="noopener noreferrer" class="card glass">
                 <div class="icon">🔐</div>
                 <div class="info">
@@ -179,14 +181,15 @@
             </div>
             <div class="modal-body">
                 <div class="pin-input-container">
-                    <input type="password" id="pin-input" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric">
+                    <input type="password" id="pin-input" placeholder="Enter 4-digit PIN" maxlength="4"
+                        inputmode="numeric">
                 </div>
                 <button id="verify-pin-btn" class="verify-button">Verify PIN</button>
-                
+
                 <div class="divider">
                     <span>OR</span>
                 </div>
-                
+
                 <button id="google-login-btn" class="google-button">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
                     Sign in with Google
@@ -196,9 +199,13 @@
         </div>
     </div>
 
-    <footer style="text-align: center; padding: 20px; margin-top: 20px; color: rgba(255, 255, 255, 0.7); font-family: 'Outfit', sans-serif;">
-        <p>&copy; 2026 rexplore technologies. Visit us at <a href="http://www.rexplore.tech" target="_blank" style="color: #fff; text-decoration: underline;">www.rexplore.tech</a></p>
-        <p style="margin-top:8px;"><a href="admin.html" style="color:rgba(255,255,255,0.25);font-size:0.75rem;text-decoration:none;letter-spacing:0.5px;">⚙️ Admin</a></p>
+    <footer
+        style="text-align: center; padding: 20px; margin-top: 20px; color: rgba(255, 255, 255, 0.7); font-family: 'Outfit', sans-serif;">
+        <p>&copy; 2026 rexplore technologies. Visit us at <a href="http://www.rexplore.tech" target="_blank"
+                style="color: #fff; text-decoration: underline;">www.rexplore.tech</a></p>
+        <p style="margin-top:8px;"><a href="admin.html"
+                style="color:rgba(255,255,255,0.25);font-size:0.75rem;text-decoration:none;letter-spacing:0.5px;">⚙️
+                Admin</a></p>
     </footer>
 
     <!-- Firebase SDKs -->
@@ -206,16 +213,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <!-- Firebase config: inline for production (Vercel), overridable via firebase-config.js locally -->
     <script>
-      window.FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
-        apiKey:            "AIzaSyAPSwKBoQzQc0f4N1VtOs56dB_0haxtOkQ",
-        authDomain:        "nrega-media.firebaseapp.com",
-        databaseURL:       "https://nrega-media-default-rtdb.firebaseio.com",
-        projectId:         "nrega-media",
-        storageBucket:     "nrega-media.firebasestorage.app",
-        messagingSenderId: "550522109679",
-        appId:             "1:550522109679:web:ac8d8bb132ae6937cd651a",
-        measurementId:     "G-S3WXVLSWN2"
-      };
+        window.FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
+            apiKey: "AIzaSyAPSwKBoQzQc0f4N1VtOs56dB_0haxtOkQ",
+            authDomain: "nrega-media.firebaseapp.com",
+            databaseURL: "https://nrega-media-default-rtdb.firebaseio.com",
+            projectId: "nrega-media",
+            storageBucket: "nrega-media.firebasestorage.app",
+            messagingSenderId: "550522109679",
+            appId: "1:550522109679:web:ac8d8bb132ae6937cd651a",
+            measurementId: "G-S3WXVLSWN2"
+        };
     </script>
     <script src="firebase-config.js" onerror=""></script>
     <script src="script.js"></script>
