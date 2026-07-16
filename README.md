@@ -41,12 +41,12 @@ It has three main pages:
 
 Collection: `gramg`
 
-- `musters` → `{ entries: [...] }`
 - `workids` → `{ list: [...] }`
 - `links` → `{ data: [...] }`
 - `dateranges` → `{ list: [...] }`
 
 Security rules allow:
+
 - public read access to `gramg/*`
 - write access only for allowlisted authenticated admin emails
 
