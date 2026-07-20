@@ -75,3 +75,6 @@ firebase deploy --only firestore
 - `manifest.json` – PWA manifest
 - `firestore.rules` – Firestore access rules
 - `firebase.json` – Firebase CLI config
+
+- 
+Designed for Surepalli village @2026
